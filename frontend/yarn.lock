@@ -363,6 +363,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@chakra-ui/icon@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@chakra-ui/icon@npm:2.0.3"
+  dependencies:
+    "@chakra-ui/utils": 1.10.2
+  peerDependencies:
+    "@chakra-ui/system": ">=1.0.0"
+    react: ">=16.8.6"
+  checksum: 8110264f4fb7a33863389956a091654b87494454604b3fe6f73d4c822c15992cc8ca9b7381ad71897e0c2bf118d3190c66fa1d6c9fe49ed17481d9ade3a72c21
+  languageName: node
+  linkType: hard
+
+"@chakra-ui/icons@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "@chakra-ui/icons@npm:1.1.5"
+  dependencies:
+    "@chakra-ui/icon": 2.0.3
+    "@types/react": ^17.0.15
+  peerDependencies:
+    "@chakra-ui/system": ">=1.0.0"
+    react: ">=16.8.6"
+  checksum: f8bfb2ff466fe9f072d596f7b293ad159a6fd579090db00e76304406f60a2ab8b20c85bc3868a55d820055b3f8793e672ee86a69320cb918246ded2b97eb10a1
+  languageName: node
+  linkType: hard
+
 "@chakra-ui/image@npm:1.0.21":
   version: 1.0.21
   resolution: "@chakra-ui/image@npm:1.0.21"
@@ -914,6 +939,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@chakra-ui/utils@npm:1.10.2":
+  version: 1.10.2
+  resolution: "@chakra-ui/utils@npm:1.10.2"
+  dependencies:
+    "@types/lodash.mergewith": 4.6.6
+    css-box-model: 1.2.1
+    framesync: 5.3.0
+    lodash.mergewith: 4.6.2
+  checksum: dba6963bd048bb145da003f71747e11f2e8d8da52a262da1ae86ea3445678055152b6bdb6986635a1fb608e4fcd03e3247f040e8f27de066c85ded7f6f7e3bd3
+  languageName: node
+  linkType: hard
+
 "@chakra-ui/utils@npm:1.8.3, @chakra-ui/utils@npm:^1.7.0":
   version: 1.8.3
   resolution: "@chakra-ui/utils@npm:1.8.3"
@@ -1426,6 +1463,31 @@ __metadata:
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
   checksum: fd6bce2b674b6efc3db4c7c3d336bd70c90838e8439de639b909ce22f3720d21344f52427f1d9e57b265fcb7f6c018699b99e5e0c208a1a4823014269a6bf35b
+  languageName: node
+  linkType: hard
+
+"@types/prop-types@npm:*":
+  version: 15.7.4
+  resolution: "@types/prop-types@npm:15.7.4"
+  checksum: ef6e1899e59b876c273811b1bd845022fc66d5a3d11cb38a25b6c566b30514ae38fe20a40f67622f362a4f4f7f9224e22d8da101cff3d6e97e11d7b4c307cfc1
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^17.0.15":
+  version: 17.0.39
+  resolution: "@types/react@npm:17.0.39"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: bf04d3c2894559012710d595553e12b422d3b91cd8f4f7e122d8cb044ba9c2ba17f6e8a4e09581359cc5509ddc59cd8c8fabd6774f3505a40a45393f074d6e6e
+  languageName: node
+  linkType: hard
+
+"@types/scheduler@npm:*":
+  version: 0.16.2
+  resolution: "@types/scheduler@npm:0.16.2"
+  checksum: b6b4dcfeae6deba2e06a70941860fb1435730576d3689225a421280b7742318d1548b3d22c1f66ab68e414f346a9542f29240bc955b6332c5b11e561077583bc
   languageName: node
   linkType: hard
 
@@ -3178,6 +3240,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "frontend@workspace:."
   dependencies:
+    "@chakra-ui/icons": ^1.1.5
     "@chakra-ui/react": ^1.6.10
     "@emotion/react": ^11
     "@emotion/styled": ^11
