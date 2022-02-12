@@ -7,7 +7,11 @@ services:
       - mongodata:/data/db
     ports:
       - "27017:27017"
-
+  nextjs:
+    depends_on:
+      - db
+    build: frontend
+    ports:
+      - "3000:3000"
 volumes:
   mongodata:
-    external: true
