@@ -26,12 +26,9 @@ export default function Home() {
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
 
-            <FeatureGrid/>
 
-            <VStack justifyContent={'center'} alignItems={'center'} minH={'100vh'} bg={'green.300'}>
-                <Heading>Messages:</Heading>
-                {!messages.length && <pre>Connecting to socket...</pre>}
-                <pre>{JSON.stringify(messages, null, 4)}</pre>
+            <VStack justifyContent={'center'} alignItems={'center'} minH={'100vh'} bg={'pink.050'}>
+                <FeatureGrid/>
             </VStack>
         </Box>
     )
