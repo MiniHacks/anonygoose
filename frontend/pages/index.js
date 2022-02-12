@@ -2,6 +2,7 @@ import Head from 'next/head'
 import io from 'socket.io-client';
 import {Box, Heading, VStack} from "@chakra-ui/react";
 import {useEffect, useState} from "react";
+import {signIn} from "next-auth/react";
 import FeatureGrid from "../components/FeatureGrid"
 
 export default function Home() {
@@ -28,6 +29,7 @@ export default function Home() {
 
 
             <VStack justifyContent={'center'} alignItems={'center'} minH={'100vh'} bg={'pink.050'}>
+                <button onClick={() => signIn("google")}>hi</button>
                 <FeatureGrid/>
             </VStack>
         </Box>
