@@ -27,10 +27,13 @@ export default function Home() {
                 color={"#0A2540"}>
                 <Button onClick={() => signIn('google')}
                     height='48px'
-                    border-radius='6px'
+                    borderRadius='6px'
+                    boxShadow={'rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset'}
+                    transition={'box-shadow .15s,transform .15s'}
                     bgGradient='linear(to-bl, pink.100, pink.500)'
                     _hover={{
-                        bgGradient: 'linear(to-tr, pink.100, pink.500)'
+                        bgGradient: 'linear(to-br, pink.100, pink.500)',
+                        boxShadow: 'rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset'
                     }}>
                     Sign in with YouTube
                 </Button>
