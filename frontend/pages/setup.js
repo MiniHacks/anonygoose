@@ -40,7 +40,7 @@ export default function Home() {
         if (!platform) return;
         const q = new URLSearchParams({platform})
         fetch("/api/livestream/start?" + q.toString()).then(r => r.json()).then(() => {
-            router.push('/stream');
+            router.reload()
         });
     }, [session])
 
@@ -258,7 +258,7 @@ export default function Home() {
                     </HStack>
                 </Box>
             </Flex>
-            <Flex justifyContent={"space-between"} alignItems={'center'} flexWrap={"wrap"} mt={40}>
+            <Flex justifyContent={"space-between"} alignItems={'center'} flexWrap={"wrap"} my={40}>
                 <Box>
                     <Heading size={"2xl"} color={"#0A2540"} lineHeight={1.3}>
                         Your Output Stream
