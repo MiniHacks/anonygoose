@@ -20,7 +20,7 @@ def stream_blurred_frames(
     rtmp_address: str,
     user_id_holder: List[str]
 ):
-    print("###########################3333 hi")
+    print(f"###########################3333 hi {rtmp_address}")
     ffmpeg_streaming_process = None
 
     print("################################3 process started")
@@ -60,18 +60,28 @@ def stream_blurred_frames(
                 "pipe:0",
                 # "-c",
                 # "copy",
-                '-vcodec',
-                'libx264',
+                '-pix_fmt',
+                'yuvj420p',
+                '-x264-params',
+                'keyint=48:min-keyint=48:scenecut=-1',
                 '-b:v',
-                '5M',
+                '4500k',
+                '-b:a',
+                '128k',
+                '-ar',
+                '44100',
                 '-acodec',
                 'aac',
-                '-b:a',
-                '256k',
+                '-vcodec',
+                'libx264',
+                '-preset',
+                'medium',
+                '-crf',
+                '28',
+                '-threads',
+                '4',
                 '-f',
                 'flv',
-                "-r",
-                "15",
                 rtmp_address
                 # "rtmp://localhost:1935/live/app",
             ],

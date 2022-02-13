@@ -14,7 +14,10 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@next-auth/mongodb-adapter": "^1.0.1",
+    "express": "^4.17.2",
     "feather-icons": "^4.28.0",
+    "formidable": "^2.0.1",
+    "formidable-serverless": "^1.1.1",
     "framer-motion": "^4",
     "mongodb": "^4.3.1",
     "next": "11.1.2",
@@ -24,11 +27,13 @@
     "react-dropzone": "^12.0.3",
     "react-hook-form": "^7.27.0",
     "react-icons": "^4.3.1",
-    "socket.io-client": "^4.3.2"
+    "socket.io-client": "^4.3.2",
+    "uuidv4": "^6.2.12"
   },
   "devDependencies": {
     "eslint": "8.0.1",
-    "eslint-config-next": "11.1.2"
+    "eslint-config-next": "11.1.2",
+    "typescript": "^4.5.5"
   },
   "packageManager": "yarn@3.1.1"
 }
