@@ -1,4 +1,4 @@
-import {Box, chakra, Flex, Heading, HStack, Text, useToast} from '@chakra-ui/react';
+import {Box, chakra, Flex, Heading, HStack, InputGroup, Text, useToast} from '@chakra-ui/react';
 import {signOut, useSession} from 'next-auth/react';
 import {PageLayout} from "../components/PageLayout";
 import Layout from "../components/Layout";
@@ -215,6 +215,19 @@ export default function Home() {
                     </HStack>
                 </Box>
                 <chakra.img src="https://placekitten.com/600/400" alt=""/>
+            </Flex>
+            <Flex justifyContent={"space-between"} alignItems={'center'} flexWrap={"wrap"}>
+                <Box>
+                    <Heading size={"2xl"} color={"#0A2540"} lineHeight={1.3}>
+                        Your Team
+                    </Heading>
+                    <Text color={'gray.600'}>
+                        Submit pictures of people to whitelist.
+                    </Text>
+                    <InputGroup onClick={handleClick}>
+                    </InputGroup>
+
+                </Box>
             </Flex>
             <Flex justifyContent={"space-between"} alignItems={'center'} flexWrap={"wrap"} mt={40}>
                 <Box>
