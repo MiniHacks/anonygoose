@@ -104,15 +104,22 @@ async def simple_controller(reader, writer):
             message = chunk.as_message()
             # logger.debug(f"Receiving {str(message)} {message.chunk_id}")
             if isinstance(message, NCConnect):
-                print(message.command_object["app"])
-                user_id, user_secret, *rest = message.command_object["app"].split("/")
+                logger.info("hello!!! "  + repr(message.command_object["app"]))
+                thingns = message.command_object["app"].split("/")
+                if len(thingns) != 2:
+                    logger.warn(f"did not have 2 things: {thingns!r}")
+                    return
+                user_id, user_secret = thingns
                 logger.debug("User id is %s, user secret is %s", user_id, user_secret)
-                if len(rest) > 0 or len(user_id) == 0:
-                    # screw these guys
+
+                try:
+                    target_uri_for_restreaming = get_user_target_uri(user_id)
+                except  LookupError:
+                    logger.warning(f"could not find mongo record for user id {user_id!r}")
                     return
 
-                target_uri_for_restreaming = get_user_target_uri(user_id)
                 if target_uri_for_restreaming is None:
+                    logger.warning("user does not have a target for restreaming")
                     return
 
                 print(f"target uri for restreaming is {target_uri_for_restreaming}")
