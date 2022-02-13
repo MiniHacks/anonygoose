@@ -1,10 +1,6 @@
 version: "3"
 services:
   nextjs:
-    depends_on:
-      - db
     build: frontend
     ports:
       - "3000:3000"
-volumes:
-  mongodata:
