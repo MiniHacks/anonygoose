@@ -1,6 +1,7 @@
 version: "3"
 services:
   nextjs:
+    network_mode: "host"
     build: frontend
     ports:
       - "3000:3000"
