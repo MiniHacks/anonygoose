@@ -222,7 +222,7 @@ export default function Home() {
                         </>}
                     </HStack>
                 </Box>
-                <chakra.img src="https://placekitten.com/600/400" alt=""/>
+                <chakra.img src="/chonk_stack.png" maxW={"40vw"} mr={'-100px'} alt=""/>
             </Flex>
             <Flex justifyContent={"space-between"} alignItems={'center'} flexWrap={"wrap"}>
                 <Box>
@@ -279,7 +279,6 @@ export default function Home() {
                         Stream to another platform
                     </Text>
                 </Box>
-                <chakra.img src="https://placekitten.com/600/400" alt=""/>
             </Flex>
         </Layout>
     </PageLayout>);
