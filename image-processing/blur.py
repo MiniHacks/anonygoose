@@ -3,9 +3,10 @@ import cv2
 import numpy as np
 import os
 
-THRESHOLD = 0.6
-KERNEL = (30,30)
-MARGIN = 0.25
+DETECTION_THRESHOLD = 0.6
+COMPARSION_THRESHOLD = 0.8
+KERNEL = (40,40)
+MARGIN = 0.3
 MINIMUM_SIZE = 20
 
 def setup_network(prototxt, model):
@@ -17,43 +18,41 @@ def setup_embedder(model):
 net = setup_network("./image-processing/deploy.prototxt", "./image-processing/res10_300x300_ssd_iter_140000.caffemodel")
 embedder = setup_embedder("./image-processing/openface_nn4.small2.v1.t7")
 
-def get_face_embeddings(userid):
-    pass # set this up to get faces from the db.
+def get_embeddings(image):
+    vectorized = []
 
-def train_to_ignore(training_sets):
-    to_ret = []
-    for set in training_sets:
-        embeddings = []
+    # print("Vectorizing image...")
 
-        i = 0
-        for image in set:
-            print("Vectorizing image", i, "...")
-            i += 1
+    image = imutils.resize(image, width=600)
+    regions = find_faces(image)
+    for region in regions:
 
-            image = imutils.resize(image, width=600)
+        (startX, startY, endX, endY) = region
 
-            regions = find_faces(image, None)
-            for (startX, startY, endX, endY) in regions:
+        if endY - startY < MINIMUM_SIZE or endX - startX < MINIMUM_SIZE:
+            continue
 
-                if endY - startY < MINIMUM_SIZE or endX - startX < MINIMUM_SIZE:
-                    continue
-
-                face = image[startY:endY, startY:endY]
-                
-                faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255,(96, 96), (0, 0, 0), swapRB=True, crop=False)
-                embedder.setInput(faceBlob)
-                face_vec = embedder.forward()
-                embeddings.append(face_vec.flatten())
-                print("Face vectorized for image", i, ":)")
-
-                # Assume only one face per image.
-                break
+        face = image[startY:endY, startY:endY]
         
-        to_ret.append(embeddings)
-    return to_ret
+        faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255,(96, 96), (0, 0, 0), swapRB=True, crop=False)
+        embedder.setInput(faceBlob)
+        face_vec = embedder.forward()
+        vectorized.append((region, face_vec.flatten()))
+        # print("Face vectorized for image.")
 
+    return vectorized
 
-def find_faces(image, to_ignore):
+def norm_cross_cor(face1, face2):
+    normalized1 = (face1 - np.mean(face1)) / np.linalg.norm(face1)
+    normalized2 = (face2 - np.mean(face2)) / np.linalg.norm(face2)
+    cor = np.dot(normalized1, normalized2)
+    return cor
+
+def compare_faces(face1, face2):
+    ncc = norm_cross_cor(face1, face2) 
+    return ncc > COMPARSION_THRESHOLD
+
+def find_faces(image):
     (h, w) = image.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
 
@@ -63,7 +62,7 @@ def find_faces(image, to_ignore):
 
     for i in range(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
-        if confidence > THRESHOLD:
+        if confidence > DETECTION_THRESHOLD:
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             regions.append(box.astype("int"))
 
@@ -97,18 +96,40 @@ def blur(image, regions):
 
     return to_ret
 
+def find_regions_to_blur(image, invalids):
+    to_ret = []
+
+    for region, face_vec in get_embeddings(image):
+        
+        to_cont = False
+        for invalid in invalids:
+            is_similar = compare_faces(face_vec, invalid)
+            if is_similar:
+                to_cont = True
+                break
+
+        if to_cont:
+            continue
+        to_ret.append(region)
+
+    return to_ret
+
 def test():
     image = cv2.imread("C:/Users/welsa/Pictures/WIN_20220212_16_20_48_Pro.jpg")
 
-    to_train = []
+    invalids = []
     folder_path = "C:/Users/welsa/Pictures/test-recognition"
     for filename in os.listdir(folder_path):
-        f = os.path.join(folder_path, filename)
-        to_train.append(cv2.imread(f))
+        pf = os.path.join(folder_path, filename)
+        for f in os.listdir(pf):
+            image_path = os.path.join(pf, f)
+            to_get = cv2.imread(image_path)
+            for _, face_vec in get_embeddings(to_get):
+                pass
+                invalids.append(face_vec)
 
-    models = train_to_ignore([to_train])
-
-    blur(image, find_faces(image, None))
+    to_blur = find_regions_to_blur(image, invalids)
+    blur(image, to_blur)
 
 if __name__ == "__main__":
     test()
