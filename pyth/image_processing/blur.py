@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from pathlib import Path
 from bson.objectid import ObjectId
 
-DETECTION_THRESHOLD = 0.6
+DETECTION_THRESHOLD = 0.4
 COMPARSION_THRESHOLD = 0.69 # Nice
 KERNEL = (80,80)
 MARGIN = 0.15
