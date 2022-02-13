@@ -3,13 +3,30 @@ services:
   nextjs:
     network_mode: "host"
     build: frontend
+#    ports:
+#      - "3000:3000"
+    volumes:
+      - images:/app/images
     env_file:
       - frontend/.env
+    environment:
+      - "IMAGE_PATH=/app/"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "1999:80"
+    volumes:
+      - images:/usr/share/nginx/html/images
 
   pyrtmp:
     network_mode: "host"
     build: "pyth"
+    volumes:
+      - images:/app/images
     env_file:
       - frontend/.env
     tmpfs:
       - /tmp/me
+volumes:
+  images:
