@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 
 DETECTION_THRESHOLD = 0.6
 COMPARSION_THRESHOLD = 0.8
-KERNEL = (40,40)
+KERNEL = (80,80)
 MARGIN = 0.15
 MINIMUM_SIZE = 20
 MONGO_URL = os.getenv("MONGO")

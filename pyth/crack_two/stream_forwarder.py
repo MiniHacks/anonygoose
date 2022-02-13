@@ -76,7 +76,11 @@ def stream_blurred_frames(
             stdin=subprocess.PIPE
         )
     
-        image = blur.blur(image, user_id_holder[0])
+        try:
+            image = blur.blur(image, user_id_holder[0])
+        except Exception as e:
+            print("Blur got an exception, uh oh??", e)
+            continue
 
         # if os.path.exists(audio_filename := f"{the_dir}/audio/test_{filenum}.mp3"):
         #     audio_instr = ["-i", audio_filename]
