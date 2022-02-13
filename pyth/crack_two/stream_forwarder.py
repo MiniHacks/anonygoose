@@ -20,7 +20,7 @@ def stream_blurred_frames(
     rtmp_address: str,
     user_id_holder: List[str]
 ):
-    print("###########################3333 hi")
+    print(f"###########################3333 hi {rtmp_address}")
     ffmpeg_streaming_process = None
 
     print("################################3 process started")
