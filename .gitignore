@@ -48,5 +48,9 @@ yarn-error.log*
 !**/.yarn/plugins
 !**/.yarn/sdks
 !**/.yarn/versions
+
+pyth/venv
+*.pyc
+**/__pycache__/
 .idea
 frontend/.env
