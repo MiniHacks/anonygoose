@@ -34,6 +34,7 @@ import tempfile
 from . import stream_forwarder
 from .better_flv_file import BetterFLVFile
 from .conf import the_dir
+from image_processing.blur import get_user_target_uri
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -86,15 +87,7 @@ async def simple_controller(reader, writer):
     frames = queue.PriorityQueue()
     user_id_holder = [None]
     logger.info("starting thread . . ")
-    taskie = threading.Thread(
-        target=stream_forwarder.stream_blurred_frames,
-        args=(
-            frames,
-            "rtmp://localhost:1233/",
-            user_id_holder,
-        ),
-    )
-    taskie.start()
+    taskie = None 
     logger.info("started thread")
 
     session = SessionManager(reader=reader, writer=writer)
@@ -116,6 +109,21 @@ async def simple_controller(reader, writer):
                 if len(rest) > 0:
                     # screw these guys
                     return
+
+                target_uri_for_restreaming = get_user_target_uri(user_id)
+                if target_uri_for_restreaming is None:
+                    return
+
+                taskie = threading.Thread(
+                    target=stream_forwarder.stream_blurred_frames,
+                    args=(
+                        frames,
+                        target_uri_for_restreaming,
+                        user_id_holder,
+                    ),
+                )
+                taskie.start()
+                    
 
                 session.write_chunk_to_stream(
                     WindowAcknowledgementSize(ack_window_size=5000000)

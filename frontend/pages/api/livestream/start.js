@@ -10,5 +10,13 @@ export default async function handler(req, res) {
     // db.collection()
     console.log(session)
     const account = await db.collection("accounts").findOne({userId: ObjectId(session.user._id)})
-    res.json({account, rtmp: "rtmp://v.anony.news/ksajdoiueoi2j"});
+
+    const { platform } = req.query;
+    if (platform == null) {
+        // idfk what to do
+    } else {
+        await db.collection("accounts").updateOne(account, { $set: { targetRTMPUri: platform }}, {});
+    }
+
+    res.json({account, rtmp: `rtmp://anony.news:1935/${account.userId}/akfjlagi2`});
 }

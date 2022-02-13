@@ -3,6 +3,8 @@ import {signOut, useSession} from 'next-auth/react';
 import {PageLayout} from "../components/PageLayout";
 import Layout from "../components/Layout";
 import MyButton from "../components/MyButton";
+import dynamic from "next/dynamic";
+const FileUpload = dynamic(() => import("../components/FileUpload"), {ssr: false})
 import {useRouter} from "next/router";
 import {useCallback, useEffect, useState} from "react";
 
@@ -16,6 +18,7 @@ export default function Home() {
     const router = useRouter();
     const [rtmp, setRtmp] = useState("");
     const toast = useToast()
+
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -215,6 +218,18 @@ export default function Home() {
                     </HStack>
                 </Box>
                 <chakra.img src="https://placekitten.com/600/400" alt=""/>
+            </Flex>
+            <Flex justifyContent={"space-between"} alignItems={'center'} flexWrap={"wrap"}>
+                <Box>
+                    <Heading size={"2xl"} color={"#0A2540"} lineHeight={1.3}>
+                        Your Team
+                    </Heading>
+                    <Text color={'gray.600'}>
+                        Submit pictures of people to whitelist.
+                    </Text>
+                    <FileUpload onFileAccepted={data => console.log(data)}/>
+
+                </Box>
             </Flex>
             <Flex justifyContent={"space-between"} alignItems={'center'} flexWrap={"wrap"} mt={40}>
                 <Box>

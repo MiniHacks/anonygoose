@@ -25,14 +25,16 @@ def stream_blurred_frames(
 
     print("################################3 process started")
     while True:
-        # print("got img")
+        print("got img")
         filenum, ms_offset, image = frames_to_blur_queue.get()
         if image is None:
+            print("image was none, skipping")
             continue
             # ffmpeg_streaming_process.stdin.close()
             # ffmpeg_streaming_process.wait()
             # return
         elif image is SENTINEL:
+            print("closing the stream")
             ffmpeg_streaming_process.stdin.close()
             ffmpeg_streaming_process.wait()
             return
@@ -88,3 +90,4 @@ def stream_blurred_frames(
         #     audio_instr = []
 
         ffmpeg_streaming_process.stdin.write(image.tobytes())
+        print("pushed to rtmp")
