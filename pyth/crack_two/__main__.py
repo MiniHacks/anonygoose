@@ -1,9 +1,11 @@
 import asyncio
 import heapq
+import queue
 import subprocess
 import logging
 import os
 import tempfile
+import threading
 import cv2
 
 import image_processing.blur as blur
@@ -27,26 +29,24 @@ from pyrtmp.messages.protocolcontrol import (
 from pyrtmp.messages.usercontrol import StreamBegin
 from pyrtmp.messages.video import VideoMessage
 from pyrtmp.misc.flvdump import FLVFile, FLVMediaType
-
 import tempfile
+
+from . import stream_forwarder
 from .better_flv_file import BetterFLVFile
+from .conf import the_dir
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-import threading
+import multiprocessing
 
-the_dir = f"{tempfile.gettempdir()}/me"
-try:
-    os.mkdir(the_dir)
-except FileExistsError:
-    pass
+
 
 async def simple_controller(reader, writer):
-    ffmpeg_subprocess: subprocess.Popen = subprocess.Popen(
+    ffmpeg_frame_conversion_subprocess: subprocess.Popen = subprocess.Popen(
         [
-            "stdbuf", 
+            "stdbuf",
             "-o0",
             "ffmpeg",
             "-f",
@@ -54,33 +54,45 @@ async def simple_controller(reader, writer):
             # "-listen",
             # "1",
             "-i",
-            "pipe:0", # read from stdin
+            "pipe:0",  # read from stdin
             # f"rtmp://localhost:1935/{user_specific_endpoint}",  #
             "-c",
             "copy",
             "-vcodec",
             "png",
-            # "-update",
-            # "y",
             "-f",
             "image2",
-            # "pipe:1" # send png to stdout
             f"{the_dir}/img%10d.png",
         ],
         stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE
+        stdout=subprocess.PIPE,
     )
+
+    # ffmpeg_audio_conversion_subprocess: subprocess.Popen = subprocess.Popen(
+    #     [
+    #         "ffmpeg",
+    #         "-f",
+    #         "flv", 
+    #         "-i",
+    #         "pipe:0",
+    #         "-f",
+    #         "segment",
+    #         "-segment_time",
+    #         "0.0033",
+    #         f"{the_dir}/audio/test_%d.mp3",
+    #     ],
+    #     stdin=subprocess.PIPE,
+    # )
 
     # threading.Thread(target=foo).start()
     seen_nums = set()
-    frames = []
-
-    frame_num, frame = heapq.heappop(frames)
-    blur.blur(frame)
-    
+    frames = queue.PriorityQueue()
+    taskie = threading.Thread(target=stream_forwarder.stream_blurred_frames, args=(frames, "rtmp://localhost:1233/"))
+    taskie.start()
 
     session = SessionManager(reader=reader, writer=writer)
-    flv = None
+    video_flv = None
+    audio_flv = None
     try:
         logger.debug(f"Client connected {session.peername}")
 
@@ -112,33 +124,39 @@ async def simple_controller(reader, writer):
                 logger.debug("Response to NCCreateStream")
             elif isinstance(message, NSPublish):
                 # create flv file at temp
-                flv = BetterFLVFile(
-                    file=ffmpeg_subprocess.stdin
-                )
+                video_flv = BetterFLVFile(file=ffmpeg_frame_conversion_subprocess.stdin)
+                # audio_flv = BetterFLVFile(file=ffmpeg_audio_conversion_subprocess.stdin)
                 session.write_chunk_to_stream(StreamBegin(stream_id=1))
                 session.write_chunk_to_stream(message.create_response())
                 await session.drain()
                 logger.debug("Response to NSPublish")
             elif isinstance(message, MetaDataMessage):
                 # Write meta data to file
-                flv.write(0, message.to_raw_meta(), FLVMediaType.OBJECT)
+                video_flv.write(0, message.to_raw_meta(), FLVMediaType.OBJECT)
+                # audio_flv.write(0, message.to_raw_meta(), FLVMediaType.OBJECT)
             elif isinstance(message, SetChunkSize):
                 session.reader_chunk_size = message.chunk_size
             elif isinstance(message, VideoMessage):
                 # Write video data to file
-                flv.write(message.timestamp, message.payload, FLVMediaType.VIDEO)
+                video_flv.write(message.timestamp, message.payload, FLVMediaType.VIDEO)
+                print(message.timestamp)
                 for file in sorted(os.listdir(path=the_dir)):
-                    file_num = int(file[3:-4])
+                    if file == 'audio':
+                        continue
+                    file_num = int(file[3:][:10])
                     if file_num not in seen_nums:
                         file_loc = os.path.join(the_dir, file)
-                        print("pushing " , file_num)
+                        print("pushing ", file_num)
                         seen_nums.add(file_num)
-                        heapq.heappush(frames, (file_num, cv2.imread(file_loc)))
+                        # Assume 30 frames per second (wrong)
+                        ms_offset = file_num / 30
+                        frames.put((file_num, ms_offset, cv2.imread(file_loc)))
                         os.unlink(file_loc)
 
             elif isinstance(message, AudioMessage):
+                pass
                 # Write data data to file
-                flv.write(message.timestamp, message.payload, FLVMediaType.AUDIO)
+                # audio_flv.write(message.timestamp, message.payload, FLVMediaType.AUDIO)
             elif isinstance(message, NSCloseStream):
                 pass
             elif isinstance(message, NSDeleteStream):
@@ -149,8 +167,10 @@ async def simple_controller(reader, writer):
     except StreamClosedException as ex:
         logger.debug(f"Client {session.peername} disconnected!")
     finally:
-        if flv:
-            flv.close()
+        if video_flv:
+            video_flv.close()
+        if audio_flv:
+            audio_flv.close()
 
 
 async def serve_rtmp(use_protocol=True, port=1935):
