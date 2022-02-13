@@ -3291,6 +3291,7 @@ __metadata:
     next-auth: ^4.2.1
     react: 17.0.2
     react-dom: 17.0.2
+    react-hook-form: ^7.27.0
     socket.io-client: ^4.3.2
   languageName: unknown
   linkType: soft
@@ -5302,6 +5303,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0
   checksum: 520b12a4496be21b3228bbf938657f6c33f868e486a0cd355d8bec918129d2c1bf7aabecb20aecdb446a1fbdb61b16f680b5d15b998f544f1b5c0dc5c8914c40
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.27.0":
+  version: 7.27.0
+  resolution: "react-hook-form@npm:7.27.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17
+  checksum: 643c643e6d52b2427e73853abe0255e39f4c323c87862b1651e7153adaf1f3db27b843dda9ea32306db102d1e9e1e00e49c2ded13705ede0706235b53ef69e24
   languageName: node
   linkType: hard
 

@@ -1,10 +1,10 @@
-import {Box, chakra, Flex, Heading, HStack, InputGroup, Text, useToast} from '@chakra-ui/react';
+import {Box, chakra, Flex, Heading, HStack, Text, useToast} from '@chakra-ui/react';
 import {signOut, useSession} from 'next-auth/react';
 import {PageLayout} from "../components/PageLayout";
 import Layout from "../components/Layout";
 import MyButton from "../components/MyButton";
 import {useRouter} from "next/router";
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useState, useRef} from "react";
 
 export default function Home() {
     const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
@@ -16,6 +16,7 @@ export default function Home() {
     const router = useRouter();
     const [rtmp, setRtmp] = useState("");
     const toast = useToast()
+
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -224,8 +225,7 @@ export default function Home() {
                     <Text color={'gray.600'}>
                         Submit pictures of people to whitelist.
                     </Text>
-                    <InputGroup onClick={handleClick}>
-                    </InputGroup>
+                    <FileUpload />
 
                 </Box>
             </Flex>
