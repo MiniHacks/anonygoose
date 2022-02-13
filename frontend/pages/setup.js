@@ -3,8 +3,9 @@ import {signOut, useSession} from 'next-auth/react';
 import {PageLayout} from "../components/PageLayout";
 import Layout from "../components/Layout";
 import MyButton from "../components/MyButton";
+import UploadManager from "../components/UploadManager"
 import {useRouter} from "next/router";
-import {useCallback, useEffect, useState, useRef} from "react";
+import {useCallback, useEffect, useState} from "react";
 
 export default function Home() {
     const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
@@ -225,7 +226,7 @@ export default function Home() {
                     <Text color={'gray.600'}>
                         Submit pictures of people to whitelist.
                     </Text>
-                    <FileUpload />
+                    <UploadManager />
 
                 </Box>
             </Flex>
