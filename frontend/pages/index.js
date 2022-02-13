@@ -42,7 +42,7 @@ export default function Home() {
                         </>}
                     </HStack>
                 </Box>
-                <chakra.img src="/news_chonk.png" maxW={"40vw"} mr={'-100px'} alt=""/>
+                <chakra.img src="/chonk_stack.png" maxW={"40vw"} mr={'-100px'} alt=""/>
             </Flex>
             <Heading mt={40} textAlign={"center"} size={"2xl"} mb={16}>Features</Heading>
             <FeatureGrid/>
