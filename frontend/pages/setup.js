@@ -7,6 +7,11 @@ import {useRouter} from "next/router";
 import {useCallback, useEffect, useState} from "react";
 
 export default function Home() {
+    const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
+    const [youtubeStreamName, setYoutubeStreamName] = useState('')
+  
+    const [streamId, setStreamId] = useState('')
+    const [broadcastId, setBroadcastId] = useState('')
     const {data: session, status} = useSession()
     const router = useRouter();
     const [rtmp, setRtmp] = useState("");
@@ -32,62 +37,150 @@ export default function Home() {
     }, [session])
 
 
-    const HELLLLLL = useCallback(() => {
-        if (!session) return;
-        fetch("/api/livestream/start").then(r => r.json()).then(r => {
-            const access_token = r.account.access_token;
-            console.log("ACCESS TOKEN", access_token);
-            gapi.load("client:auth2", function () {
-                gapi.client.setToken(access_token)
-                console.log("starting client:auth2");
+    const HELLLLLL = useCallback(async () => {
+        console.log("fuck")
+        if (!session) return; 
+        console.log("me")
+        const response = await fetch("/api/livestream/start")
+        const data = await response.json() 
+        const access_token = data.account.access_token;
+        console.log("ACCESS TOKEN", access_token);
+        gapi.load("client:auth2", function () {
+            gapi.client.setToken(access_token)
+            console.log("starting client:auth2");
 
-                const client_id = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-                gapi.auth2.init({client_id});
-                console.log("Initialized with client_id", client_id);
+            const client_id = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+            gapi.auth2.init({client_id});
+            console.log("Initialized with client_id", client_id);
 
-                const api_key = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
-                gapi.client.setApiKey(api_key);
-                console.log("Initialized with api_key", api_key);
-                setTimeout(() => {
-                    console.log("waited for 1 sec");
-                    gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
-                        .then(function () {
-                                console.log("GAPI client loaded for API");
-                                gapi.client.youtube.liveBroadcasts.insert({
-                                    part: ['id,snippet,contentDetails,status'],
-                                    resource: {
-                                        snippet: {
-                                            title: 'New Video:',
-                                            scheduledStartTime: '2022-02-14T04:13:16+0000',
-                                            description:
-                                                'A description of your video stream. This field is optional.',
-                                        },
-                                        status: {
-                                            privacyStatus: 'public',
-                                            selfDeclaredMadeForKids: false,
-                                        },
+            const api_key = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+            gapi.client.setApiKey(api_key);
+            console.log("Initialized with api_key", api_key);
+            setTimeout(() => {
+                console.log("waited for 1 sec");
+                gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
+                    .then(() => {
+                            console.log("GAPI client loaded for API");
+                            gapi.client.youtube.liveBroadcasts.insert({
+                                part: ['id,snippet,contentDetails,status'],
+                                resource: {
+                                    snippet: {
+                                        title: 'New Video:',
+                                        scheduledStartTime: `${new Date().toISOString()}`,
+                                        description:
+                                            'A description of your video stream. This field is optional.',
                                     },
-                                })
-                                    .then(function (response) {
-                                            // Handle the results here (response.result has the parsed body).
-                                            console.log("Response", response);
-                                        },
-                                        function (err) {
-                                            console.error("Execute error", err);
-                                        });
+                                    status: {
+                                        privacyStatus: 'public',
+                                        selfDeclaredMadeForKids: false,
+                                    },
+                                },
+                            })
+                                .then(async (response) => {
+                                        // Handle the results here (response.result has the parsed body).
+                                        const id = response.result.id;
+                                        createStream()
+                                        bindBroadcastToStream(id)
+                                        /*
+                                        setTimeout(() => {
+                                            transitionToLive(id)
+                                        }, 5000)
+                                        */
+                                        const r = await listLivestreams()
+                                        console.log(r.result)
+                                    },
+                                    (err) => {
+                                        console.error("Execute error", err);
+                                    });
 
-                            },
-                            function (err) {
-                                console.error("Error loading GAPI client for API", err);
-                            });
+                        },
+                        (err) => {
+                            console.error("Error loading GAPI client for API", err);
+                        });
 
-                }, 1000)
-            });
-
+            }, 1000)
         })
 
     }, [session])
 
+    const bindBroadcastToStream = (id) => {
+        return gapi.client.youtube.liveBroadcasts
+          .bind({
+            part: ['id,snippet,contentDetails,status'],
+            id: id,
+            streamId: streamId,
+          })
+          .then((res) => {
+            //console.log('Response', res)
+            console.log(res.result.id)
+          })
+          .catch((err) => {
+            console.error('Execute error', err)
+          })
+    }
+
+    const createStream = () => {
+        return gapi.client.youtube.liveStreams
+          .insert({
+            part: ['snippet,cdn,contentDetails,status'],
+            resource: {
+              snippet: {
+                title: "Your new video stream's name",
+                description:
+                  'A description of your video stream. This field is optional.',
+              },
+              cdn: {
+                frameRate: 'variable',
+                ingestionType: 'rtmp',
+                resolution: 'variable',
+                format: '',
+              },
+              contentDetails: {
+                isReusable: true,                                        
+                enableAutoStart: true,
+                broadcastType: "persistent"
+              },
+            },
+          })
+          .then((res) => {
+            //console.log('Response', res)
+    
+            setStreamId(res.result.id)
+            console.log('streamID' + res.result.id)
+    
+            setYoutubeIngestionUrl(res.result.cdn.ingestionInfo.ingestionAddress)
+            console.log(res.result.cdn.ingestionInfo.ingestionAddress)
+    
+            setYoutubeStreamName(res.result.cdn.ingestionInfo.streamName)
+            console.log(res.result.cdn.ingestionInfo.streamName)
+          })
+          .catch((err) => {
+            console.log('Execute error', err)
+          })
+    }
+
+    const listLivestreams = async () => {
+        return gapi.client.youtube.liveStreams.list( {
+                part: ['snippet,id,cdn,status'],
+                mine: true
+            })
+    }
+
+    const transitionToLive = (id) => {
+        return gapi.client.youtube.liveBroadcasts
+            .transition({
+            part: ['id,snippet,contentDetails,status'],
+            broadcastStatus: 'live',
+            id: id,
+            })
+            .then((res) => {
+            // Handle the results here (response.result has the parsed body).
+            console.log('Response', res)
+            })
+            .catch((err) => {
+            console.log('Execute error', err)
+            })
+    }
 
     return (<PageLayout wave={'40vh'}>
         <Layout pt={'13vh'}>
