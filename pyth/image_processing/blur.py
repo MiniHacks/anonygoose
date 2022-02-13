@@ -5,12 +5,17 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pathlib import Path
+from bson.objectid import ObjectId
 
 DETECTION_THRESHOLD = 0.6
 COMPARSION_THRESHOLD = 0.8
 KERNEL = (40,40)
 MARGIN = 0.15
 MINIMUM_SIZE = 20
+MONGO_URL = os.getenv("MONGO")
+
+def setup_mongo(url):
+    return MongoClient(url)
 
 def setup_network(prototxt, model):
     return cv2.dnn.readNetFromCaffe(prototxt, model)
@@ -19,9 +24,9 @@ def setup_embedder(model):
     return cv2.dnn.readNetFromTorch(model)
 
 module_dir = Path(__file__).absolute().parent
-
 net = setup_network(str(module_dir / "deploy.prototxt"), str(module_dir / "res10_300x300_ssd_iter_140000.caffemodel"))
 embedder = setup_embedder(str(module_dir / "openface_nn4.small2.v1.t7"))
+mongo = setup_mongo(MONGO_URL)
 
 def get_embeddings(image):
     vectorized = []
@@ -87,7 +92,7 @@ def find_faces(image):
 
     return regions
 
-def blur_regions(image, regions):
+def blur_regions(image, regions, preview=False):
     (h, w) = image.shape[:2]
     to_ret = image.copy()
 
@@ -108,10 +113,11 @@ def blur_regions(image, regions):
         blurred_part = cv2.blur(to_ret[startY:endY, startX:endX], ksize=KERNEL)
         to_ret[startY:endY, startX:endX] = blurred_part
 
-        cv2.rectangle(to_ret, (startX, startY), (endX, endY), (0, 0, 255), 2)
-
-    cv2.imshow("preview", to_ret)
-    cv2.waitKey(0)
+        if preview:
+            cv2.rectangle(to_ret, (startX, startY), (endX, endY), (0, 0, 255), 2)
+    if preview:
+        cv2.imshow("preview", to_ret)
+        cv2.waitKey(0)
 
     return to_ret
 
@@ -133,28 +139,55 @@ def find_regions_to_blur(image, invalids):
 
     return to_ret
 
-def blur(frame, userid):
-    pass
+def load_mongo_image(path):
+    return cv2.imread(path) # TODO: Check if we need to transform this path.
+
+def get_images_from_userID(userID):
+    anonynews_db = mongo["anonynews"]
+    images_col = anonynews_db["images"]
+    image_docs = images_col.find({"user": userID})
+
+    images =  []
+    for doc in image_docs:
+        image = load_mongo_image(doc["path"])
+        images.append(image)
+    return images
+
+face_vecs_cache = {}
+def get_invalid_face_vecs(userID):
+    global face_vecs_cache
+    if userID in face_vecs_cache:
+        return face_vecs_cache[userID]
+
+    images = get_images_from_userID(userID)
+    to_ret = []
+    for image in images:
+        for _, face_vec in get_embeddings(image):
+            to_ret.append(face_vec)
+    face_vecs_cache[userID] = to_ret
+    return to_ret
+
+def blur(frame, userID):
+    invalids = get_invalid_face_vecs(userID)
+    to_blur = find_regions_to_blur(frame, invalids)
+    to_ret = blur_regions(frame, to_blur)
+    return to_ret
 
 def test():
-    # image = cv2.imread("C:/Users/welsa/Pictures/Camera Roll/WIN_20220212_20_26_28_Pro.jpg")
+    image = cv2.imread("C:/Users/welsa/Pictures/Camera Roll/WIN_20220212_20_26_28_Pro.jpg")
 
-    # invalids = []
-    # folder_path = "C:/Users/welsa/Pictures/test-recognition"
-    # for filename in os.listdir(folder_path):
-    #     pf = os.path.join(folder_path, filename)
-    #     for f in os.listdir(pf):
-    #         image_path = os.path.join(pf, f)
-    #         to_get = cv2.imread(image_path)
-    #         for _, face_vec in get_embeddings(to_get):
-    #             invalids.append(face_vec)
+    invalids = []
+    folder_path = "C:/Users/welsa/Pictures/test-recognition"
+    for filename in os.listdir(folder_path):
+        pf = os.path.join(folder_path, filename)
+        for f in os.listdir(pf):
+            image_path = os.path.join(pf, f)
+            to_get = cv2.imread(image_path)
+            for _, face_vec in get_embeddings(to_get):
+                invalids.append(face_vec)
 
-    # to_blur = find_regions_to_blur(image, invalids)
-    # blur_regions(image, to_blur)
-    MONGO_URL = os.getenv("MONGO")
-    mongo = MongoClient(MONGO_URL)
-    pass
-
+    to_blur = find_regions_to_blur(image, invalids)
+    blur_regions(image, to_blur, preview=True)
 
 if __name__ == "__main__":
     load_dotenv()
