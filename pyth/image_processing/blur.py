@@ -4,6 +4,7 @@ import numpy as np
 import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from pathlib import Path
 
 DETECTION_THRESHOLD = 0.6
 COMPARSION_THRESHOLD = 0.8
@@ -17,8 +18,10 @@ def setup_network(prototxt, model):
 def setup_embedder(model):
     return cv2.dnn.readNetFromTorch(model)
 
-net = setup_network("./image-processing/deploy.prototxt", "./image-processing/res10_300x300_ssd_iter_140000.caffemodel")
-embedder = setup_embedder("./image-processing/openface_nn4.small2.v1.t7")
+module_dir = Path(__file__).absolute().parent
+
+net = setup_network(str(module_dir / "deploy.prototxt"), str(module_dir / "res10_300x300_ssd_iter_140000.caffemodel"))
+embedder = setup_embedder(str(module_dir / "openface_nn4.small2.v1.t7"))
 
 def get_embeddings(image):
     vectorized = []
