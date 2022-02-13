@@ -1,3 +1,4 @@
+from cv2 import resize
 import imutils
 import cv2
 import numpy as np
@@ -6,7 +7,7 @@ import os
 DETECTION_THRESHOLD = 0.6
 COMPARSION_THRESHOLD = 0.8
 KERNEL = (40,40)
-MARGIN = 0.3
+MARGIN = 0.15
 MINIMUM_SIZE = 20
 
 def setup_network(prototxt, model):
@@ -23,7 +24,13 @@ def get_embeddings(image):
 
     # print("Vectorizing image...")
 
+    (h, w) = image.shape[:2]
     image = imutils.resize(image, width=600)
+    (nh, nw) = image.shape[:2]
+
+    hs = h / nh
+    ws = w / nw
+
     regions = find_faces(image)
     for region in regions:
 
@@ -32,19 +39,22 @@ def get_embeddings(image):
         if endY - startY < MINIMUM_SIZE or endX - startX < MINIMUM_SIZE:
             continue
 
-        face = image[startY:endY, startY:endY]
+        face = image[startY:endY, startX:endX]
         
         faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255,(96, 96), (0, 0, 0), swapRB=True, crop=False)
         embedder.setInput(faceBlob)
         face_vec = embedder.forward()
-        vectorized.append((region, face_vec.flatten()))
+
+        region = (int(startX * ws), int(startY * hs), int(endX * ws), int(endY * hs))
+
+        vectorized.append((region, face_vec))
         # print("Face vectorized for image.")
 
     return vectorized
 
 def norm_cross_cor(face1, face2):
-    normalized1 = (face1 - np.mean(face1)) / np.linalg.norm(face1)
-    normalized2 = (face2 - np.mean(face2)) / np.linalg.norm(face2)
+    normalized1 = np.squeeze((face1 - np.mean(face1)) / np.linalg.norm(face1))
+    normalized2 = np.squeeze((face2 - np.mean(face2)) / np.linalg.norm(face2))
     cor = np.dot(normalized1, normalized2)
     return cor
 
@@ -54,17 +64,25 @@ def compare_faces(face1, face2):
 
 def find_faces(image):
     (h, w) = image.shape[:2]
-    blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+    resized = cv2.resize(image, (300, 300))
+    (hr, wr) = resized.shape[:2]
+    hScale = h / hr
+    wScale = w / wr
+    blob = cv2.dnn.blobFromImage(resized, 1.0, (300, 300), (104.0, 177.0, 123.0))
+
+    regions = []
 
     net.setInput(blob)
     detections = net.forward()
-    regions = []
 
     for i in range(0, detections.shape[2]):
+
         confidence = detections[0, 0, i, 2]
         if confidence > DETECTION_THRESHOLD:
+
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-            regions.append(box.astype("int"))
+            region = box.astype("int")
+            regions.append(region)
 
     return regions
 
@@ -115,7 +133,7 @@ def find_regions_to_blur(image, invalids):
     return to_ret
 
 def test():
-    image = cv2.imread("C:/Users/welsa/Pictures/WIN_20220212_16_20_48_Pro.jpg")
+    image = cv2.imread("C:/Users/welsa/Pictures/Camera Roll/WIN_20220212_20_26_28_Pro.jpg")
 
     invalids = []
     folder_path = "C:/Users/welsa/Pictures/test-recognition"
@@ -125,7 +143,6 @@ def test():
             image_path = os.path.join(pf, f)
             to_get = cv2.imread(image_path)
             for _, face_vec in get_embeddings(to_get):
-                pass
                 invalids.append(face_vec)
 
     to_blur = find_regions_to_blur(image, invalids)
