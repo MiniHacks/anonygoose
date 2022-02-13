@@ -93,6 +93,7 @@ async def simple_controller(reader, writer):
     session = SessionManager(reader=reader, writer=writer)
     video_flv = None
     audio_flv = None
+    user_id, user_secret = None
     try:
         logger.debug(f"Client connected {session.peername}")
 
@@ -104,6 +105,11 @@ async def simple_controller(reader, writer):
             message = chunk.as_message()
             logger.debug(f"Receiving {str(message)} {message.chunk_id}")
             if isinstance(message, NCConnect):
+                user_id, user_secret, *rest = message.command_object['app'].split('/')
+                if len(rest) > 0:
+                    # screw these guys
+                    return
+                
                 session.write_chunk_to_stream(
                     WindowAcknowledgementSize(ack_window_size=5000000)
                 )
