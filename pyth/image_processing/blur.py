@@ -1,8 +1,9 @@
-from cv2 import resize
 import imutils
 import cv2
 import numpy as np
 import os
+from dotenv import load_dotenv
+from pymongo import MongoClient
 
 DETECTION_THRESHOLD = 0.6
 COMPARSION_THRESHOLD = 0.8
@@ -65,9 +66,6 @@ def compare_faces(face1, face2):
 def find_faces(image):
     (h, w) = image.shape[:2]
     resized = cv2.resize(image, (300, 300))
-    (hr, wr) = resized.shape[:2]
-    hScale = h / hr
-    wScale = w / wr
     blob = cv2.dnn.blobFromImage(resized, 1.0, (300, 300), (104.0, 177.0, 123.0))
 
     regions = []
@@ -86,7 +84,7 @@ def find_faces(image):
 
     return regions
 
-def blur(image, regions):
+def blur_regions(image, regions):
     (h, w) = image.shape[:2]
     to_ret = image.copy()
 
@@ -132,21 +130,29 @@ def find_regions_to_blur(image, invalids):
 
     return to_ret
 
+def blur(frame, userid):
+    pass
+
 def test():
-    image = cv2.imread("C:/Users/welsa/Pictures/Camera Roll/WIN_20220212_20_26_28_Pro.jpg")
+    # image = cv2.imread("C:/Users/welsa/Pictures/Camera Roll/WIN_20220212_20_26_28_Pro.jpg")
 
-    invalids = []
-    folder_path = "C:/Users/welsa/Pictures/test-recognition"
-    for filename in os.listdir(folder_path):
-        pf = os.path.join(folder_path, filename)
-        for f in os.listdir(pf):
-            image_path = os.path.join(pf, f)
-            to_get = cv2.imread(image_path)
-            for _, face_vec in get_embeddings(to_get):
-                invalids.append(face_vec)
+    # invalids = []
+    # folder_path = "C:/Users/welsa/Pictures/test-recognition"
+    # for filename in os.listdir(folder_path):
+    #     pf = os.path.join(folder_path, filename)
+    #     for f in os.listdir(pf):
+    #         image_path = os.path.join(pf, f)
+    #         to_get = cv2.imread(image_path)
+    #         for _, face_vec in get_embeddings(to_get):
+    #             invalids.append(face_vec)
 
-    to_blur = find_regions_to_blur(image, invalids)
-    blur(image, to_blur)
+    # to_blur = find_regions_to_blur(image, invalids)
+    # blur_regions(image, to_blur)
+    MONGO_URL = os.getenv("MONGO")
+    mongo = MongoClient(MONGO_URL)
+    pass
+
 
 if __name__ == "__main__":
+    load_dotenv()
     test()
