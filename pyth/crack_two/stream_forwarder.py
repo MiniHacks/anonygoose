@@ -10,6 +10,11 @@ import subprocess
 from .conf import the_dir
 from image_processing import blur
 
+class SentinelCls:
+    pass
+
+SENTINEL = SentinelCls()
+
 def stream_blurred_frames(
     frames_to_blur_queue: "queue.PriorityQueue[Tuple[int, int, np.ndarray]]",
     rtmp_address: str,
@@ -23,6 +28,11 @@ def stream_blurred_frames(
         print("got img")
         filenum, ms_offset, image = frames_to_blur_queue.get()
         if image is None:
+            continue
+            # ffmpeg_streaming_process.stdin.close()
+            # ffmpeg_streaming_process.wait()
+            # return
+        elif image is SENTINEL:
             ffmpeg_streaming_process.stdin.close()
             ffmpeg_streaming_process.wait()
             return
@@ -43,13 +53,23 @@ def stream_blurred_frames(
                 "-s",
                 f"{img_width}x{img_height}",
                 "-r",
-                "30",
+                "15",
                 "-i",
                 "pipe:0",
                 # "-c",
                 # "copy",
-                "-f",
-                "flv",
+                '-vcodec',
+                'libx264',
+                '-b:v',
+                '5M',
+                '-acodec',
+                'aac',
+                '-b:a',
+                '256k',
+                '-f',
+                'flv',
+                "-r",
+                "15",
                 rtmp_address
                 # "rtmp://localhost:1935/live/app",
             ],
