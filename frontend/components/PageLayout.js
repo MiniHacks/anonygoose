@@ -5,7 +5,7 @@ import Wave from "./Wave";
 
 export const PageLayout = ({children, wave}) => (<Box>
     <Head>
-        <title>Reveal the story, mot those around you | Anonynews</title>
+        <title>anony.news</title>
         <meta
             name='description'
             content="Created for Hack For Humanity 2022"
