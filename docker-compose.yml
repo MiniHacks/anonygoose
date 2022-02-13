@@ -3,7 +3,13 @@ services:
   nextjs:
     network_mode: "host"
     build: frontend
-    # ports:
-    #   - "3000:3000"
     env_file:
       - frontend/.env
+
+  pyrtmp:
+    network_mode: "host"
+    build: "pyth"
+    env_file:
+      - frontend/.env
+    tmpfs:
+      - /tmp/me
