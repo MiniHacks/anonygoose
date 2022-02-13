@@ -13,6 +13,7 @@ KERNEL = (80,80)
 MARGIN = 0.15
 MINIMUM_SIZE = 20
 MONGO_URL = os.getenv("MONGO")
+MEMORY_LENGTH = 4
 
 def setup_mongo(url):
     return MongoClient(url)
@@ -97,7 +98,8 @@ def blur_regions(image, regions, preview=False):
     (h, w) = image.shape[:2]
     to_ret = image.copy()
 
-    for (startX, startY, endX, endY) in regions:
+    for thing in regions:
+        (startX, startY, endX, endY) = thing[0]
 
         yMargin = (MARGIN * (endY - startY)) / 2.0
         xMargin = (MARGIN * (endX - startX)) / 2.0
@@ -122,7 +124,9 @@ def blur_regions(image, regions, preview=False):
 
     return to_ret
 
-def find_regions_to_blur(image, invalids):
+memory = {}
+def find_regions_to_blur(image, invalids, userid):
+    global memory
     to_ret = []
 
     for region, face_vec in get_embeddings(image):
@@ -136,8 +140,15 @@ def find_regions_to_blur(image, invalids):
 
         if to_cont:
             continue
-        to_ret.append(region)
+        to_ret.append([region, MEMORY_LENGTH])
 
+    if userid in memory:
+        for region, length in memory[userid]:
+            nl = length - 1
+            if nl > 0:
+                to_ret.append([region, length - 1])
+
+    memory[userid] = to_ret
     return to_ret
 
 def load_mongo_image(path):
@@ -178,7 +189,7 @@ def get_invalid_face_vecs(userID):
 
 def blur(frame, userID):
     invalids = get_invalid_face_vecs(userID)
-    to_blur = find_regions_to_blur(frame, invalids)
+    to_blur = find_regions_to_blur(frame, invalids, userID)
     to_ret = blur_regions(frame, to_blur)
     return to_ret
 
@@ -195,9 +206,23 @@ def test():
             for _, face_vec in get_embeddings(to_get):
                 invalids.append(face_vec)
 
-    to_blur = find_regions_to_blur(image, invalids)
+    to_blur = find_regions_to_blur(image, invalids, "0")
     blur_regions(image, to_blur, preview=True)
 
 if __name__ == "__main__":
     load_dotenv()
-    print(repr(get_user_target_uri("62083c5e653f72b04624352c")))
+    cap = cv2.VideoCapture("C:/Users/welsa/Pictures/Camera Roll/WIN_20220213_12_46_59_Pro.mp4")
+    fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
+    capOut = None
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if capOut is None:
+            capOut = cv2.VideoWriter("C:/Users/welsa/Pictures/Camera Roll/blurrred.mp4", fourcc, 30, (frame.shape[1], frame.shape[0]))
+
+        capOut.write(blur(frame, "0"))
+
+
+    # print(repr(get_user_target_uri("62083c5e653f72b04624352c")))
