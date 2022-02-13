@@ -157,7 +157,7 @@ def get_user_target_uri(user_id):
     anonynews_db = mongo["anonynews"]
     users = anonynews_db["accounts"].find({"userId": ObjectId(user_id)})
     try:
-        return next(iter(users)).get("rtmpURI", None)
+        return next(iter(users)).get("targetRTMPUri", None)
     except StopIteration:
         raise LookupError("no user with that userid :/")
 
