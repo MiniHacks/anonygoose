@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pathlib import Path
+from bson.objectid import ObjectId
 
 DETECTION_THRESHOLD = 0.6
 COMPARSION_THRESHOLD = 0.8
@@ -153,6 +154,14 @@ def test():
     # blur_regions(image, to_blur)
     MONGO_URL = os.getenv("MONGO")
     mongo = MongoClient(MONGO_URL)
+    uid = "324324ADSF12"
+    anonynews_db = mongo["anonynews"]
+    images_col = anonynews_db["images"]
+    image_docs = images_col.find({"user": uid})
+
+    for doc in image_docs:
+        print(doc)
+    
     pass
 
 
