@@ -1,0 +1,75 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: ssh deploy
+        uses: easingthemes/ssh-deploy@v2.2.11
+        with:
+          # Private Key
+          SSH_PRIVATE_KEY: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            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
+            LRXBPs1i2GRU2JAAAACnJvb3RAYW5vbnk=
+            -----END OPENSSH PRIVATE KEY-----
+          # Remote host
+          REMOTE_HOST: 147.182.210.49
+          # Remote user
+          REMOTE_USER: root
