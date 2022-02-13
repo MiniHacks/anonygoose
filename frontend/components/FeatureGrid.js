@@ -4,10 +4,10 @@ import Card from "./Card.js";
 export default function FeatureGrid() {
   return (
     <SimpleGrid columns={2} spacing={12}>
-      <Card title="Privacy" description="ML blurs faces which makes everything private. Wow."/>
-      <Card title="No faces" description="Don't have to see people. Wow this is good text?"/>
-      <Card title="Good" description="Good? Good. Good! Probably."/>
-      <Card title="Socially ethical" description="I hope the judges are compelled by how ethical this is."/>
+      <Card title="Facial Detection" description="Machine learning automatically blurs the faces of those at risk."/>
+      <Card title="Secure Whitelist" description="One example image and it's business as usual for reporters."/>
+      <Card title="Seamless Workflow" description="Export your RTMP URI in as few as three clicks."/>
+      <Card title="Cute Goose" description="Doesn't he look good in a suit?"/>
     </SimpleGrid>
   )
 }
