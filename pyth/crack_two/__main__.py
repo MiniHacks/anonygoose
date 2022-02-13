@@ -87,13 +87,13 @@ async def simple_controller(reader, writer):
     # threading.Thread(target=foo).start()
     seen_nums = set()
     frames = queue.PriorityQueue()
-    taskie = threading.Thread(target=stream_forwarder.stream_blurred_frames, args=(frames, "rtmp://localhost:1233/"))
+    user_id_holder = [None]
+    taskie = threading.Thread(target=stream_forwarder.stream_blurred_frames, args=(frames, "rtmp://localhost:1233/", user_id_holder))
     taskie.start()
 
     session = SessionManager(reader=reader, writer=writer)
     video_flv = None
     audio_flv = None
-    user_id, user_secret = None
     try:
         logger.debug(f"Client connected {session.peername}")
 
@@ -106,6 +106,7 @@ async def simple_controller(reader, writer):
             logger.debug(f"Receiving {str(message)} {message.chunk_id}")
             if isinstance(message, NCConnect):
                 user_id, user_secret, *rest = message.command_object['app'].split('/')
+                logger.debug("User id is %s, user secret is %s", user_id, user_secret)
                 if len(rest) > 0:
                     # screw these guys
                     return
