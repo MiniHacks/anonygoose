@@ -6,6 +6,8 @@ import os
 import tempfile
 import cv2
 
+import image_processing.blur as blur
+
 from pyrtmp import StreamClosedException, RTMPProtocol
 from pyrtmp.messages import SessionManager
 from pyrtmp.messages.audio import AudioMessage
@@ -72,6 +74,10 @@ async def simple_controller(reader, writer):
     # threading.Thread(target=foo).start()
     seen_nums = set()
     frames = []
+
+    frame_num, frame = heapq.heappop(frames)
+    blur.blur(frame)
+    
 
     session = SessionManager(reader=reader, writer=writer)
     flv = None
