@@ -48,4 +48,5 @@ Considering professional broadcast tooling, model fine-tuning, and an endless qu
 ## Citations  
 
 Smith, T. (2019, October 22). In Hong Kong, protesters fight to stay anonymous. The Verge. Retrieved February 13, 2022, from https://www.theverge.com/2019/10/22/20926585/hong-kong-china-protest-mask-umbrella-anonymous-surveillance
+
 Amos, B., Ludwiczuk, B., and Satyanarayanan, M. “OpenFace: A general-purpose library with face recognition library with mobile applications”  Retrieved 13 February 2022.
