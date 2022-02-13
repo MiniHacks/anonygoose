@@ -47,6 +47,14 @@ export default function Home() {
             <Heading mt={40} textAlign={"center"} size={"2xl"} mb={16}>Features</Heading>
             <FeatureGrid/>
             <Heading mt={20} textAlign={"center"} size={"2xl"} mb={16}>See it in action!</Heading>
+            <Box mt={20}>
+                <iframe
+                    src="https://player.twitch.tv/?channel=montressorempire74&parent=anony.news"
+                    height="800px"
+                    width="100%"
+                    allowFullScreen="true">
+                </iframe>
+            </Box>
         </Layout>
     </PageLayout>);
 }
