@@ -1,17 +1,15 @@
 version: "3"
 services:
-  db:
-    image: mongo
-    container_name: db_mongo
-    volumes:
-      - mongodata:/data/db
-    ports:
-      - "27017:27017"
   nextjs:
-    depends_on:
-      - db
+    network_mode: "host"
     build: frontend
-    ports:
-      - "3000:3000"
-volumes:
-  mongodata:
+    env_file:
+      - frontend/.env
+
+  pyrtmp:
+    network_mode: "host"
+    build: "pyth"
+    env_file:
+      - frontend/.env
+    tmpfs:
+      - /tmp/me

@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 
 DETECTION_THRESHOLD = 0.6
 COMPARSION_THRESHOLD = 0.8
-KERNEL = (40,40)
+KERNEL = (80,80)
 MARGIN = 0.15
 MINIMUM_SIZE = 20
 MONGO_URL = os.getenv("MONGO")
@@ -153,6 +153,14 @@ def get_images_from_userID(userID):
         images.append(image)
     return images
 
+def get_user_target_uri(user_id):
+    anonynews_db = mongo["anonynews"]
+    users = anonynews_db["accounts"].find({"userId": ObjectId(user_id)})
+    try:
+        return next(iter(users)).get("targetRTMPUri", None)
+    except StopIteration:
+        raise LookupError("no user with that userid :/")
+
 face_vecs_cache = {}
 def get_invalid_face_vecs(userID):
     global face_vecs_cache
@@ -191,4 +199,4 @@ def test():
 
 if __name__ == "__main__":
     load_dotenv()
-    test()
+    print(repr(get_user_target_uri("62083c5e653f72b04624352c")))

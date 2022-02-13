@@ -34,6 +34,7 @@ import tempfile
 from . import stream_forwarder
 from .better_flv_file import BetterFLVFile
 from .conf import the_dir
+from image_processing.blur import get_user_target_uri
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -42,12 +43,9 @@ logger.setLevel(logging.DEBUG)
 import multiprocessing
 
 
-
 async def simple_controller(reader, writer):
     ffmpeg_frame_conversion_subprocess: subprocess.Popen = subprocess.Popen(
         [
-            "stdbuf",
-            "-o0",
             "ffmpeg",
             "-f",
             "flv",
@@ -72,7 +70,7 @@ async def simple_controller(reader, writer):
     #     [
     #         "ffmpeg",
     #         "-f",
-    #         "flv", 
+    #         "flv",
     #         "-i",
     #         "pipe:0",
     #         "-f",
@@ -87,8 +85,10 @@ async def simple_controller(reader, writer):
     # threading.Thread(target=foo).start()
     seen_nums = set()
     frames = queue.PriorityQueue()
-    taskie = threading.Thread(target=stream_forwarder.stream_blurred_frames, args=(frames, "rtmp://localhost:1233/"))
-    taskie.start()
+    user_id_holder = [None]
+    logger.info("starting thread . . ")
+    taskie = None 
+    logger.info("started thread")
 
     session = SessionManager(reader=reader, writer=writer)
     video_flv = None
@@ -102,8 +102,29 @@ async def simple_controller(reader, writer):
         # read chunks
         async for chunk in session.read_chunks_from_stream():
             message = chunk.as_message()
-            logger.debug(f"Receiving {str(message)} {message.chunk_id}")
+            # logger.debug(f"Receiving {str(message)} {message.chunk_id}")
             if isinstance(message, NCConnect):
+                user_id, user_secret, *rest = message.command_object["app"].split("/")
+                logger.debug("User id is %s, user secret is %s", user_id, user_secret)
+                if len(rest) > 0:
+                    # screw these guys
+                    return
+
+                target_uri_for_restreaming = get_user_target_uri(user_id)
+                if target_uri_for_restreaming is None:
+                    return
+
+                taskie = threading.Thread(
+                    target=stream_forwarder.stream_blurred_frames,
+                    args=(
+                        frames,
+                        target_uri_for_restreaming,
+                        user_id_holder,
+                    ),
+                )
+                taskie.start()
+                    
+
                 session.write_chunk_to_stream(
                     WindowAcknowledgementSize(ack_window_size=5000000)
                 )
@@ -139,19 +160,19 @@ async def simple_controller(reader, writer):
             elif isinstance(message, VideoMessage):
                 # Write video data to file
                 video_flv.write(message.timestamp, message.payload, FLVMediaType.VIDEO)
-                print(message.timestamp)
                 for file in sorted(os.listdir(path=the_dir)):
-                    if file == 'audio':
+                    if file == "audio":
                         continue
                     file_num = int(file[3:][:10])
                     if file_num not in seen_nums:
                         file_loc = os.path.join(the_dir, file)
-                        print("pushing ", file_num)
-                        seen_nums.add(file_num)
-                        # Assume 30 frames per second (wrong)
-                        ms_offset = file_num / 30
-                        frames.put((file_num, ms_offset, cv2.imread(file_loc)))
-                        os.unlink(file_loc)
+                        read_image = cv2.imread(file_loc)
+                        if read_image is not None and read_image.size > 0:
+                            seen_nums.add(file_num)
+                            # Assume 30 frames per second (wrong)
+                            ms_offset = file_num / 30
+                            frames.put((file_num, ms_offset, read_image))
+                            os.unlink(file_loc)
 
             elif isinstance(message, AudioMessage):
                 pass
@@ -160,7 +181,7 @@ async def simple_controller(reader, writer):
             elif isinstance(message, NSCloseStream):
                 pass
             elif isinstance(message, NSDeleteStream):
-                pass
+                frames.put((100000000, 0, stream_forwarder.SENTINEL))
             else:
                 logger.debug(f"Unknown message {str(message)}")
 
