@@ -25,7 +25,7 @@ def stream_blurred_frames(
 
     print("################################3 process started")
     while True:
-        # print("got img")
+        print("got img")
         filenum, ms_offset, image = frames_to_blur_queue.get()
         if image is None:
             continue
