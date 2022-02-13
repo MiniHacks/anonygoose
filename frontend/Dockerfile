@@ -2,6 +2,7 @@
 FROM node:16 as builder
 
 WORKDIR /app
+
 COPY .env package.json yarn.lock ./
 RUN yarn install
 
