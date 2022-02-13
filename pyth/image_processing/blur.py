@@ -8,7 +8,7 @@ from pathlib import Path
 from bson.objectid import ObjectId
 
 DETECTION_THRESHOLD = 0.6
-COMPARSION_THRESHOLD = 0.8
+COMPARSION_THRESHOLD = 0.69 # Nice
 KERNEL = (80,80)
 MARGIN = 0.15
 MINIMUM_SIZE = 20
@@ -69,6 +69,7 @@ def norm_cross_cor(face1, face2):
 
 def compare_faces(face1, face2):
     ncc = norm_cross_cor(face1, face2) 
+    # print(ncc)
     return ncc > COMPARSION_THRESHOLD
 
 def find_faces(image):
@@ -113,8 +114,8 @@ def blur_regions(image, regions, preview=False):
         blurred_part = cv2.blur(to_ret[startY:endY, startX:endX], ksize=KERNEL)
         to_ret[startY:endY, startX:endX] = blurred_part
 
-        if preview:
-            cv2.rectangle(to_ret, (startX, startY), (endX, endY), (0, 0, 255), 2)
+        # if preview:
+        #     cv2.rectangle(to_ret, (startX, startY), (endX, endY), (0, 0, 255), 2)
     if preview:
         cv2.imshow("preview", to_ret)
         cv2.waitKey(0)
@@ -182,7 +183,7 @@ def blur(frame, userID):
     return to_ret
 
 def test():
-    image = cv2.imread("C:/Users/welsa/Pictures/Camera Roll/WIN_20220212_20_26_28_Pro.jpg")
+    image = cv2.imread("C:/Users/welsa/Pictures/20220213_095018_25.jpg")
 
     invalids = []
     folder_path = "C:/Users/welsa/Pictures/test-recognition"

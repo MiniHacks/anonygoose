@@ -104,15 +104,18 @@ async def simple_controller(reader, writer):
             message = chunk.as_message()
             # logger.debug(f"Receiving {str(message)} {message.chunk_id}")
             if isinstance(message, NCConnect):
+                print(message.command_object["app"])
                 user_id, user_secret, *rest = message.command_object["app"].split("/")
                 logger.debug("User id is %s, user secret is %s", user_id, user_secret)
-                if len(rest) > 0:
+                if len(rest) > 0 or len(user_id) == 0:
                     # screw these guys
                     return
 
                 target_uri_for_restreaming = get_user_target_uri(user_id)
                 if target_uri_for_restreaming is None:
                     return
+
+                print(f"target uri for restreaming is {target_uri_for_restreaming}")
 
                 taskie = threading.Thread(
                     target=stream_forwarder.stream_blurred_frames,
