@@ -6,7 +6,7 @@ import { FiFile } from 'react-icons/fi'
 
 
 export default function UploadManager() {
-  const {register, handleSubmit, formState: {errors} } = useForm()
+  const {register, handleSubmit, formState: {errors}} = useForm()
   const onSubmit = handleSubmit((data) => console.log('On Submit: ', data))
 
   const validateFiles = (value) => {
@@ -30,6 +30,9 @@ export default function UploadManager() {
             </Button>
           </FileUpload>
 
+          <FormErrorMessage>
+            {errors.file_ && errors?.file_.message}
+          </FormErrorMessage>
         </FormControl>
       </form>
     </>

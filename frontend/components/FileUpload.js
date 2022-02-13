@@ -1,28 +1,40 @@
+import { useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Center, useColorModeValue, Icon } from '@chakra-ui/react';
+import { AiFillFileAdd } from 'react-icons/ai';
 
-import { InputGroup } from '@chakra-ui/react';
-import { useRef } from 'react';
+export default function FileUpload({ onFileAccepted }) {
+    const onDrop = useCallback((acceptedFiles) => {
+        onFileAccepted(acceptedFiles);
+    }, [onFileAccepted]);
 
-export default function FileUpload(register, accept, children) {
-  const inputRef = useRef(null)
-  const { ref, ...rest } = register
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop, accept: ['.png', ".jpg", ".jpeg"], maxFiles: 10, multiple: true,
+    });
 
-  const handleClick = () => inputRef.current.click();
+    const dropText = isDragActive ? 'Drop the images here ...' : 'Drag your images or click to select files';
 
-  return (
-    <InputGroup onClick={handleClick}>
-        <input
-            type={'file'}
-            multiple={true}
-            hidden
-            accept={accept}
-            {...rest}
-            ref={(e) => {
-                ref(e)
-                inputRef.current = e
-            }}
-        />
-        <> {children} </>
-    </InputGroup>
-  )
+    const activeBg = useColorModeValue('gray.100', 'gray.600');
+    const borderColor = useColorModeValue(
+        isDragActive ? 'teal.300' : 'gray.300',
+        isDragActive ? 'teal.500' : 'gray.500',
+    );
 
+    return (
+        <Center
+            p={10}
+            cursor="pointer"
+            bg={isDragActive ? activeBg : 'transparent'}
+            _hover={{ bg: activeBg }}
+            transition="background-color 0.2s ease"
+            borderRadius={4}
+            border="3px dashed"
+            borderColor={borderColor}
+            {...getRootProps()}
+        >
+            <input {...getInputProps()} />
+            <Icon as={AiFillFileAdd} mr={2} />
+            <p>{dropText}</p>
+        </Center>
+    );
 }

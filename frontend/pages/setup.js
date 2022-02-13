@@ -3,7 +3,8 @@ import {signOut, useSession} from 'next-auth/react';
 import {PageLayout} from "../components/PageLayout";
 import Layout from "../components/Layout";
 import MyButton from "../components/MyButton";
-import UploadManager from "../components/UploadManager"
+import dynamic from "next/dynamic";
+const FileUpload = dynamic(() => import("../components/FileUpload"), {ssr: false})
 import {useRouter} from "next/router";
 import {useCallback, useEffect, useState} from "react";
 
@@ -226,7 +227,7 @@ export default function Home() {
                     <Text color={'gray.600'}>
                         Submit pictures of people to whitelist.
                     </Text>
-                    <UploadManager />
+                    <FileUpload onFileAccepted={data => console.log(data)}/>
 
                 </Box>
             </Flex>
