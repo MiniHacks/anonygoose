@@ -52,3 +52,5 @@ yarn-error.log*
 pyth/venv
 *.pyc
 **/__pycache__/
+.idea
+frontend/.env
