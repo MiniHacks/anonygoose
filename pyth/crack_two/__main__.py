@@ -158,11 +158,13 @@ async def simple_controller(reader, writer):
                     file_num = int(file[3:][:10])
                     if file_num not in seen_nums:
                         file_loc = os.path.join(the_dir, file)
-                        seen_nums.add(file_num)
-                        # Assume 30 frames per second (wrong)
-                        ms_offset = file_num / 30
-                        frames.put((file_num, ms_offset, cv2.imread(file_loc)))
-                        os.unlink(file_loc)
+                        read_image = cv2.imread(file_loc)
+                        if read_image is not None and read_image.size > 0:
+                            seen_nums.add(file_num)
+                            # Assume 30 frames per second (wrong)
+                            ms_offset = file_num / 30
+                            frames.put((file_num, ms_offset, read_image))
+                            os.unlink(file_loc)
 
             elif isinstance(message, AudioMessage):
                 pass
