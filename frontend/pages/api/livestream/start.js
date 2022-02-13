@@ -9,6 +9,6 @@ export default async function handler(req, res) {
     const db = mongoClient.db();
     // db.collection()
     console.log(session)
-    const account =  await db.collection("accounts").findOne({userId: ObjectId(session.user._id)})
-    res.json(account);
+    const account = await db.collection("accounts").findOne({userId: ObjectId(session.user._id)})
+    res.json({account, rtmp: "rtmp://v.anony.news/ksajdoiueoi2j"});
 }
