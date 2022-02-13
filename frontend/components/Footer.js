@@ -6,6 +6,6 @@ const Footer = () => (<Layout p={4}>
                              _hover={{textDecorationStyle: "solid"}}
                              href="https://github.com/minihacks">Minihacks</chakra.a> team for <chakra.a
     textDecoration={"underline"} textDecorationStyle={"dotted"}
-    _hover={{textDecorationStyle: "solid"}}    href="https://hackforhumanity.io/">Hack for Humanity</chakra.a> 2022 &hearts;
+    _hover={{textDecorationStyle: "solid"}}    href="https://hackforhumanity.io/">Hack for Humanity</chakra.a> 2022 🦢
 </Layout>)
 export default Footer;
