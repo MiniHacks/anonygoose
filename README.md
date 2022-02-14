@@ -1,7 +1,7 @@
 ## [Anony.news](https://anony.news)
 [*Devpost*](https://devpost.com/software/anony-news)
 
-![A rather dapper goose](https://cdn.discordapp.com/attachments/940005439427444746/942273525731983370/news_chonk.png)
+![A rather dapper goose](https://github.com/MiniHacks/anonygoose/raw/main/copy/landing_page.jpeg)
 
 ## Inspiration
 
